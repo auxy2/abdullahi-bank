@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./style.css"; // Import the CSS file
-import logo from '../assests/logo.png'; // Adjust the path based on where your logo is stored
+import logo from '../assets/logo.png'; // Adjust the path based on where your logo is stored
 
 
 const LoginPage = () => {
