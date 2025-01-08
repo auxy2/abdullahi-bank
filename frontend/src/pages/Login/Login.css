@@ -44,7 +44,16 @@ body, html {
     width: 60px; /* Ensure the image fits within the box */
     margin-bottom: 15px; /* Space between logo and text */
   }
-  
+  .error {
+    color: red;
+    font-size: 0.75em; /* Smaller text size */
+    margin-top: 3px;   /* Reduce spacing */
+    margin-bottom: 3px;
+    margin-left: 0px;  /* Add a slight indent */
+    margin-left: 0;    /* Align with input fields */
+    text-align: left; 
+    font-weight: 400;  /* Normal weight to blend in */
+  }
   .login-box h2 {
     font-size: 28px;
     font-weight: 700;
