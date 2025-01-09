@@ -1,6 +1,6 @@
 import server from './src/server.js';
 import dotenv from 'dotenv';
-import { connectDB } from './src/services/database.js';
+import { connectDB } from './src/servicces/database.js';
 
 const { PORT } = process.env;
 
