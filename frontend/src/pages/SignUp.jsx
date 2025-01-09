@@ -2,13 +2,16 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./style.css"; // Import the CSS file
 import logo from "../assets/logo.png"; // Adjust the path based on where your logo is stored
+import { useNavigate } from 'react-router-dom';
 
 const SignupPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [errors, setErrors] = useState({ email: "", phoneNumber: "" });
+  const [errors, setErrors] = useState({ email: "", phoneNumber: "", signUp: "" });
+  const navigate = useNavigate();
+
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,19 +38,27 @@ const SignupPage = () => {
     }
   };
 
+
+  const handleSubmit = (message) => {
+    setErrors((prev) => ({ ...prev, signUp: message }));
+  }
+
   const handleSignup = async () => {
     if (errors.email || errors.phoneNumber) {
       console.error("Fix validation errors before submitting");
       return;
     }
+    setErrors((prev) => ({ ...prev, signUp:"" }));
     try {
       const payload = { username, email, password, phoneNumber };
       console.log(payload);
-      const res = await axios.post("http://localhost:5000/api/auth/signup", payload);
+      const res = await axios.post("http://localhost:3464/api/signup", payload);
       console.log("Signed up:", res.data);
-      // Redirect to login or home page
+      if(res.data.message = 'Successful')
+        navigate('/login');
     } catch (err) {
-      console.error("Signup error:", err);
+      console.log("Error", err.response.data.message)
+      handleSubmit(err?.response?.data?.message)
     }
   };
 
@@ -84,6 +95,7 @@ const SignupPage = () => {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
         />
+        {errors.signUp && <p className="error">{errors.signUp}</p>}
         <button onClick={handleSignup}>Signup</button>
         <div className="switch-link">
           <span>Already have an account?</span>

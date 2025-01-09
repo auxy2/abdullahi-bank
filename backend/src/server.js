@@ -32,7 +32,7 @@ app.use(cors(corsOptions));
 app.use(morgan('tiny'));
 app.use(helmet());
 
-app.use('/v1', routes);
+app.use('/api', routes);
 app.use(notFound);
 
 export default server;

@@ -4,12 +4,14 @@ import mongoose  from "mongoose";
 const UserSchema = mongoose.Schema({
     username: {
         type: String,
-        required: true,
+        unique: true,
+        required: [true, 'Username is required'],
         trim: true
     }, 
     email: {
         type: String,
-        required: true,
+        unique: true,
+        required: [true, 'email is required'],
         trim: true
     },
     password: {
@@ -18,7 +20,7 @@ const UserSchema = mongoose.Schema({
     }, 
     phoneNumber: {
         type: String,
-        required: true,
+        required: [true, 'Phone Number is required'],
         trim: true
     } ,
     walletBalance: {

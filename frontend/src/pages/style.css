@@ -45,8 +45,8 @@ body, html {
     margin-bottom: 15px; /* Space between logo and text */
   }
   .error {
-    color: red;
-    font-size: 0.75em; /* Smaller text size */
+    color: rgb(236, 70, 70);
+    font-size: 0.90em; /* Smaller text size */
     margin-top: 3px;   /* Reduce spacing */
     margin-bottom: 3px;
     margin-left: 0px;  /* Add a slight indent */
