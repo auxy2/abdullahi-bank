@@ -198,6 +198,28 @@ button:hover {
   .chat-input button:hover {
     background-color: #0056b3;
   }
+
+  .account-name-container {
+    background-color: rgb(105, 172, 105); /* Light background for contrast */
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 250px; /* Limit width to prevent it from stretching */
+    margin: 0 auto; /* Center the container horizontally */
+    margin-bottom: 0px; /* Space from elements below */
+    text-align: center; /* Center the text within the container */
+  }
+  
+  .account-name {
+    font-size: 15px; /* Adjust font size as needed */
+    font-weight: bold;
+    color: #0467be; /* Set a color that contrasts well */
+    margin: 0;
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Show ellipsis for long names */
+  }
+  
   
   .error-modal {
     position: fixed;

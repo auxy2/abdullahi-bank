@@ -1,4 +1,5 @@
 import { UnauthenticatedError } from '../utils/error/custom.js';
+import jwt from "jsonwebtoken"
 
 /**
  *
@@ -45,4 +46,12 @@ export const sendResponse = (res, statusCode, data) => {
   });
 };
 
+// export const payload = (user) => {
+//   const token = jwt.sign({ Id: user._id, email: user.email }, JWT_SECRET, {
+//     expiresIn: JWTEXPIN,
+//     issuer: JWT_ISS,
+//   });
+
+//   return { user, token };
+// };
 export { error, success };

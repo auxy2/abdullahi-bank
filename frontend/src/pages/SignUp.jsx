@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import "./style.css"; // Import the CSS file
 import logo from "../assets/logo.png"; // Adjust the path based on where your logo is stored
@@ -9,7 +9,7 @@ const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [errors, setErrors] = useState({ email: "", phoneNumber: "", signUp: "" });
+  const [errors, setErrors] = useState({ email: "", phoneNumber: "", sgnUp: "" });
   const navigate = useNavigate();
 
 

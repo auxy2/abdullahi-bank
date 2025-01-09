@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 import "./style.css"; // Import the CSS file
 import logo from '../assets/logo.png'; // Adjust the path based on where your logo is stored
+import { UserContext } from '../Component';
+
 
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({ email: "", phoneNumber: "" });
+  const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
+  const [errors, setErrors] = useState({ email: "", phoneNumber: "", login: "" });
   
     const validateEmail = (email) => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,15 +28,23 @@ const LoginPage = () => {
         setErrors((prev) => ({ ...prev, email: "" }));
       }
     };
+
+    const handleSubmit = (message) => {
+      setErrors((prev) => ({ ...prev, login: message }));
+    }
   console.log("This is our login page");
 
   const handleLogin = async () => {
     try {
+      setErrors((prev) => ({ ...prev, login: "" }));
       const res = await axios.post("http://localhost:3464/api/login", { email, password });
       console.log("Logged in:", res.data);
+      setUser(res.data.userData);
+      navigate('/dashboard');
       // Store JWT token in localStorage or state
     } catch (err) {
-      console.error("Login error:", err);
+      console.log("Login error:", err.response.data.message);
+      handleSubmit(err?.response?.data?.message);
     }
   };
 
@@ -57,6 +70,7 @@ const LoginPage = () => {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
         />
+        {errors.login && <p className="error">{errors.login}</p>}
         <button onClick={handleLogin}>Login</button>
         <div className="switch-link">
           <span>Don't have an account?</span>
