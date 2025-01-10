@@ -45,6 +45,59 @@ export const verifyAccount = async (data) => {
     console.log("Bank Name:", accountData);
     return accountData
   } catch (error) {
-    console.log("Error verifying account:", error);
+    console.log("Error verifying account:", error.response.data.message.split(". ")[0]);
+    return error.response.data.message.split(". ")[0]
+  }
+};
+
+
+export const createRecipient = async (accountNumber, bankCode, accountName) => {
+  try {
+    const response = await axios.post(
+      "https://api.paystack.co/transferrecipient",
+      {
+        type: "nuban",
+        name: accountName,
+        account_number: accountNumber,
+        bank_code: bankCode,
+        currency: "NGN",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_SECRETE}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data.data.recipient_code;
+  } catch (error) {
+    console.error("Error creating recipient:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+export const payout = async (recipientCode, amount) => {
+  try {
+    const response = await axios.post(
+      "https://api.paystack.co/transfer",
+      {
+        source: "balance",
+        amount: amount * 100, 
+        recipient: recipientCode,
+        reason: "Payment for services",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_SECRETE}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Transfer Successful:", response.data);
+    return response.data;
+  } catch (error) {
+    console.log("Error making transfer:", error.response?.data || error.message);
   }
 };

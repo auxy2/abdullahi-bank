@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from "../../Component";
 import axios from "axios";
@@ -17,7 +18,7 @@ const UserDashboard = () => {
   const { user } = useContext(UserContext);
   const { setUser } = useContext(UserContext);
   const [accountNumber, setAccountNumber] = useState("");
-  const [accountName, setAccountName] = useState(""); // New state for account name
+  const [accountName, setAccountName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isTransferFormOpen, setIsTransferFormOpen] = useState(false);
@@ -26,6 +27,8 @@ const UserDashboard = () => {
   const [transferAmount, setTransferAmount] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -43,7 +46,6 @@ const UserDashboard = () => {
     const fetchBanks = async () => {
       try {
         const res = await axios.get("http://localhost:3464/api/banks");
-        console.log(res.data.data);
         setBanks(res.data.data);
       } catch (err) {
         console.error("Error fetching bank list:", err);
@@ -59,6 +61,10 @@ const UserDashboard = () => {
       setNotifications((prevNotifications) => [...prevNotifications, message]);
     });
 
+    socket.on("chat", (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
     socket.on("disconnect", () => {
       console.log("Disconnected from WebSocket server");
     });
@@ -72,7 +78,6 @@ const UserDashboard = () => {
   }, []);
 
   const handleBankSelect = async (bankCode) => {
-    console.log("bank", bankCode)
     setSelectedBank(bankCode);
     if (accountNumber) {
       try {
@@ -80,23 +85,17 @@ const UserDashboard = () => {
           accountNumber,
           bankCode,
         });
-        console.log("Account Name",res.data)
-        console.log("res", res.data.data.account_name);
-        setAccountName(res.data.data.account_name); // Update account name
+        setAccountName(res.data.data.account_name || res.data.data);
       } catch (err) {
-        if (err.response?.status === 409) {
-          setError("Conflict error: Account verification failed due to mismatch or duplicate request.");
-        } else {
-          setError("An error occurred while verifying the account. Please try again.");
-        }
-        setAccountName("");
+        setAccountName("Could not resolve account name");
+        setError("An error occurred while verifying the account. Please try again.");
       }
     }
   };
 
   const handleAccountNumberChange = (e) => {
     setAccountNumber(e.target.value);
-    setAccountName(""); // Reset account name on account number change
+    setAccountName("");
   };
 
   const closeError = () => {
@@ -105,6 +104,54 @@ const UserDashboard = () => {
 
   const toggleTransferForm = () => {
     setIsTransferFormOpen(!isTransferFormOpen);
+    setAccountName("");
+    setAccountName("");
+    setTransferAmount("")
+  };
+
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
+
+  const handleTransfer = async () => {
+    if (!accountNumber || !selectedBank || !transferAmount) {
+      setError("Please fill in all fields to proceed.");
+      toggleTransferForm()
+      return;
+    }
+  
+    try {
+      setLoading(true);
+      console.log(accountNumber, selectedBank, transferAmount);
+      const response = await axios.post("http://localhost:3464/api/transfer", {
+        accountNumber,
+        bankCode: selectedBank,
+        amount: transferAmount,
+      });
+  
+      if (response.data.success) {
+        setWalletBalance((prev) => prev - transferAmount); // Update wallet balance
+        setError(""); // Clear any existing errors
+        toggleTransferForm(); // Close the transfer form
+        alert("Transfer successful!");
+      } else {
+        setError(response.data.message || "Transfer failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Transfer API error:", err);
+      setError("An error occurred while processing the transfer. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  const handleSendMessage = () => {
+    const socket = io("http://localhost:3464");
+    socket.emit("chat", newMessage);
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    setNewMessage("");
   };
 
   if (loading) {
@@ -181,14 +228,12 @@ const UserDashboard = () => {
               ))}
             </select>
           </div>
-          {/* {accountName && (
-            <p className="account-name">Account Name: {accountName}</p>
-          )} */}
           {accountName && (
-    <div className="account-name-container">
-      <p className="account-name">{accountName}</p>
-    </div>
-  )}
+  <div className="account-name-container">
+    <p className="account-name">{accountName}</p>
+  </div>
+)}
+          {/* {accountName && <p className="account-name">Account Name: {accountName}</p>} */}
           <div className="form-group">
             <label>Amount</label>
             <input
@@ -198,7 +243,34 @@ const UserDashboard = () => {
               placeholder="Enter amount"
             />
           </div>
-          <button>Submit Transfer</button>
+          <button onClick={handleTransfer}>Submit Transfer</button>
+        </div>
+      )}
+
+      <div className="chat-icon-container" onClick={toggleChat}>
+        <img src={chatIcon} alt="Chat" className="chat-icon" />
+      </div>
+
+      {isChatOpen && (
+        <div className="chat-window">
+          <div className="chat-header">
+            <span>Chat</span>
+            <button onClick={toggleChat}>X</button>
+          </div>
+          <div className="chat-messages">
+            {messages.map((message, index) => (
+              <p key={index}>{message}</p>
+            ))}
+          </div>
+          <div className="chat-input">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message"
+            />
+            <button onClick={handleSendMessage}>Send</button>
+          </div>
         </div>
       )}
     </div>

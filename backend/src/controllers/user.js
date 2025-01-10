@@ -1,6 +1,7 @@
 import { error, success } from "../helpers/response.js";
 import asyncWrapper from "../middlewares/async.js";
-import { banks, verifyAccount } from "../servicces/paystack.js";
+import User from "../models/user.js";
+import { banks, verifyAccount, createRecipient, payout } from "../servicces/paystack.js";
 import { BadRequestError } from "../utils/error/custom.js";
 
 
@@ -31,3 +32,34 @@ export const validateAccount = asyncWrapper(async(req, res) => {
         return error(res, e?.statusCode || 500, e)
     }
 })
+
+export const tranfer = asyncWrapper(async(req, res) => {
+    try{
+        const {
+            body:{ username, bankCode, accountNumber, accountName, amount }
+        } = req;
+        console.log(body)
+
+
+        const user = await User.findOne({ username });
+        if(!user){
+            throw new BadRequestError('No user Found');
+        }
+        
+        if(user.walletBalance >= amount){
+        const resCode = await createRecipient(accountNumber, bankCode, accountName);
+             const trnx = await payout(resCode, amount);
+             if(trnx.data.status === "success"){
+                user.walletBalance -= amount 
+                await user.save();
+             }else{
+                throw new BadRequestError("Transaction was not proceed please try again latter")
+             }
+            }else{
+                throw new BadRequestError("Insurficient Balance");
+            }
+        return success(res, 200, undefined, user)
+    }catch(e){
+        return error(res, e?.statusCode || 500, e)
+    }
+});
