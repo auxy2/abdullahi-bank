@@ -52,6 +52,7 @@ const UserDashboard = () => {
       }
     };
 
+
     const socket = io("http://localhost:3464");
     socket.on("connect", () => {
       console.log("Connected to WebSocket server");
@@ -76,6 +77,14 @@ const UserDashboard = () => {
       socket.disconnect();
     };
   }, []);
+
+  const handleTopUp = async() => {
+    try{
+      console.log("Top Up")
+    }catch(err){
+      
+    }
+  }
 
   const handleBankSelect = async (bankCode) => {
     setSelectedBank(bankCode);
@@ -119,28 +128,29 @@ const UserDashboard = () => {
       setError("Please fill in all fields to proceed.");
       toggleTransferForm()
       return;
-    }
-  
+    }  
     try {
       setLoading(true);
-      console.log(accountNumber, selectedBank, transferAmount);
+      console.log(accountNumber, accountName, selectedBank, transferAmount);
       const response = await axios.post("http://localhost:3464/api/transfer", {
+        username,
         accountNumber,
+        accountName,
         bankCode: selectedBank,
         amount: transferAmount,
       });
-  
       if (response.data.success) {
         setWalletBalance((prev) => prev - transferAmount); // Update wallet balance
         setError(""); // Clear any existing errors
         toggleTransferForm(); // Close the transfer form
-        alert("Transfer successful!");
+        alert("Transfer successful!"); 
       } else {
         setError(response.data.message || "Transfer failed. Please try again.");
       }
     } catch (err) {
-      console.error("Transfer API error:", err);
-      setError("An error occurred while processing the transfer. Please try again.");
+      console.log("Transfer API error:", err?.response?.data?.message);
+      toggleTransferForm();
+      setError(err?.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -175,7 +185,7 @@ const UserDashboard = () => {
       <div className="user-info">
         <h2>Welcome, {username}</h2>
         <p>Wallet Balance: ₦{walletBalance.toFixed(2)}</p>
-        <p>Account Number: {accountNumber}</p>
+        <button onClick={handleTopUp}>TOP UP</button>
       </div>
 
       <div className="actions-container">

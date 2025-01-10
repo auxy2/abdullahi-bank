@@ -5,11 +5,20 @@ dontenv.config()
 
 const { AUTH_OPTION = 'Bearer', PAYSTACK_SECRETE } = process.env;
 const listBanks = 'https://api.paystack.co/bank'
-// const validateAccount = "https://api.paystack.co/decision/validate_account";
 const validateAccount = "https://api.paystack.co/bank/resolve";
-// const validateAccount = 'https://api.paystack.co/bank/resolve_account';
+export const cardPayment = 'https://api.paystack.co/transaction/initialize';
 
 
+
+export const response = async (url, paymentData) => {
+  const res = await axios.post(url, paymentData, {
+    headers: {
+      Authorization: `Bearer ${PAYSTACK_SECRETE}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
 
 
 export const banks = async () => {
@@ -100,4 +109,17 @@ export const payout = async (recipientCode, amount) => {
   } catch (error) {
     console.log("Error making transfer:", error.response?.data || error.message);
   }
+};
+
+
+export const payWithCard = async (paymentData) => {
+  const paymentPayload = {
+    ...paymentData,
+    metadata: {
+      reason: paymentData.reason,
+      requestId: paymentData.Id,
+    },
+  };
+  const res = response(cardPayment, paymentPayload);
+  return res;
 };

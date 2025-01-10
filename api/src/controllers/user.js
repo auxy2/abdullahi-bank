@@ -1,5 +1,6 @@
 import { error, success } from "../helpers/response.js";
 import asyncWrapper from "../middlewares/async.js";
+import user from "../models/user.js";
 import User from "../models/user.js";
 import { banks, verifyAccount, createRecipient, payout } from "../servicces/paystack.js";
 import { BadRequestError } from "../utils/error/custom.js";
@@ -38,14 +39,14 @@ export const tranfer = asyncWrapper(async(req, res) => {
         const {
             body:{ username, bankCode, accountNumber, accountName, amount }
         } = req;
-        console.log(body)
+        console.log(req.body)
 
 
         const user = await User.findOne({ username });
         if(!user){
             throw new BadRequestError('No user Found');
         }
-        
+        console.log(user);
         if(user.walletBalance >= amount){
         const resCode = await createRecipient(accountNumber, bankCode, accountName);
              const trnx = await payout(resCode, amount);
@@ -63,3 +64,26 @@ export const tranfer = asyncWrapper(async(req, res) => {
         return error(res, e?.statusCode || 500, e)
     }
 });
+
+export const topUp = asyncWrapper(async(req, res) => {
+    try{
+        const { 
+            body: { username, amount } 
+        }= req;
+        const user = await User.findOne({ username });
+        if(!user){
+            throw new BadRequestError("No user found please login again")
+        }
+
+        const paymentData = {
+            email: user.email,
+            amount: amount * 100,
+            currency: "NGN",
+            callback_url: paystackCallbackUrl,
+            reason: "Top Up Wallet",
+          };
+
+    }catch(e){
+        return error(res, e?.statusCode || 500, e)
+    }
+})
